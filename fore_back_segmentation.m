@@ -3,11 +3,11 @@ close all;
 fclose all;
 addpath(genpath('gco'));
 
-img_color = imread('s189.jpg');
-img_depth = imread('bi.tiff');
+img_color = imread('global.jpg');
+img_depth = imread('global.tiff');
 
 % superpixel segmentation
-[L, N] = superpixels(img_color, 1500, 'Compactness', 5);
+[L, N] = superpixels(img_color, 3000, 'Compactness', 5);
 BW = boundarymask(L);
 figure, imshow(imoverlay(img_color, BW, 'cyan'), ...
     'InitialMagnification', 67);
@@ -52,7 +52,7 @@ for spind = 1:N
    mean_depth_spg = mean(depth_sps);
    std_depth_spg = std(depth_sps);
    % if cross edges
-   if max_depth - min_depth > 5
+   if max_depth - min_depth > 10  %越小mask越多
       for sp_ind2 = 1:size(sp_inds, 1)
           if depth_sps(sp_ind2, 1) < mean_depth_spg - std_depth_spg
               cost_vol(sp_inds(sp_ind2, 1), 1) = cost_vol(sp_inds(sp_ind2, 1), 1) - 1;
@@ -112,4 +112,6 @@ for spind = 1:N
 end
 figure, imshow(img2 * 0.5 + img_color);
 
-imwrite(uint8(img2), 'mask.png');
+msk = imdilate(logical(img2(:,:,1)),ones(9));
+
+imwrite(msk, 'mask.png');
